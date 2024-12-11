@@ -3,7 +3,7 @@
 Plugin Name: NOSUN Popups
 Plugin URI: https://github.com/mjnosun/nosun-popups-plugin
 Description: Custom Popups.
-Version: 0.0.2
+Version: 0.0.3
 Author: NOSUN MJ
 Author URI: https://www.no-sun.com
 License: GPLv2 or later
@@ -19,7 +19,7 @@ Requires Plugins: advanced-custom-fields-pro
 /**
  * constants
  */
-define( 'PLUGIN_VERSION', '0.0.2' );
+define( 'PLUGIN_VERSION', '0.0.3' );
 define( 'PLUGIN_NAMESPACE', 'nosun-popups-plugin' );
 
 /**
@@ -29,6 +29,9 @@ add_action( 'wp_enqueue_scripts', 'nos_popups_enqueue' );
 function nos_popups_enqueue() {
 	// styles
 	wp_enqueue_style('nos-popups-plugin-css', plugin_dir_url( __FILE__ ) . 'assets/css/popups-main.css', array(), PLUGIN_VERSION, 'all');
+	if (!wp_style_is('grid', 'enqueued')) {
+		wp_enqueue_style('fallback-grid', plugin_dir_url(__FILE__) . 'assets/css/fallback-grid.css', array(), PLUGIN_VERSION, 'all');
+	}
 	// scripts
 	wp_enqueue_script('nos-popups-plugin-js', plugin_dir_url( __FILE__ ) . 'assets/js/popups-main.js', array('jquery'), PLUGIN_VERSION, array('in_footer' => true));
 }
