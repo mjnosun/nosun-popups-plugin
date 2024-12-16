@@ -29,9 +29,11 @@ if ( $nts_pop_trigger == 'time-delay' ) {
 $text = get_field('nos_popup_content_sticky_bar_text');
 $text_color = get_field('nos_popup_content_sticky_bar_text_color');
 $bg_color = get_field('nos_popup_content_sticky_bar_bg_color');
+$storage = get_field('nos_popup_storage')?:'session';
+
 ?>
 <div class="popup-bg <?php echo ( is_singular('nos_popups') ? ' active' : '' ); ?>" id="popup-bg-<?php the_ID(); ?>"></div>
-<div class="popup-wrapper popup-count-<?php echo $itemCount.' popup-style-'.$popup_style.'' . ( is_singular('nos_popups') ? ' active' : '' ); ?>" id="popup-<?php the_ID(); ?>" data-trigger-type="<?php echo $triggerType; ?>"<?php echo $triggerConAttr; ?>>
+<div class="popup-wrapper popup-count-<?php echo $itemCount.' popup-style-'.$popup_style.'' . ( is_singular('nos_popups') ? ' active' : '' ); ?>" id="popup-<?php the_ID(); ?>" data-trigger-type="<?php echo $triggerType; ?>"<?php echo $triggerConAttr; ?> data-storage="<?= $storage ?>">
 	<div class="popup"<?php echo ( $bg_color ? 'style="background-color:'.$bg_color.';"' : '' ); ?>>
 		<div class="popup-inner">
 			<button aria-label="<?php echo __('Popup schließen', 'nosun'); ?>" class="popup-close"></button>

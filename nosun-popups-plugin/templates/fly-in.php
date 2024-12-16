@@ -27,9 +27,11 @@ if ( $nts_pop_trigger == 'time-delay' ) {
 }
 // design options and contents
 $content_blocks = get_field('nos_popup_contents_fly_in');
+$storage = get_field('nos_popup_storage')?:'session';
+
 ?>
 <div class="popup-bg popup-bg-<?php echo $itemCount . ( is_singular('nos_popups') ? ' active' : '' ); ?>" id="popup-bg-<?php the_ID(); ?>"></div>
-<div class="popup-wrapper popup-count-<?php echo $itemCount.' popup-style-'.$popup_style.'' . ( is_singular('nos_popups') ? ' active' : '' ); ?>" id="popup-<?php the_ID(); ?>" data-trigger-type="<?php echo $triggerType; ?>"<?php echo $triggerConAttr; ?>>
+<div class="popup-wrapper popup-count-<?php echo $itemCount.' popup-style-'.$popup_style.'' . ( is_singular('nos_popups') ? ' active' : '' ); ?>" id="popup-<?php the_ID(); ?>" data-trigger-type="<?php echo $triggerType; ?>"<?php echo $triggerConAttr; ?> data-storage="<?= $storage ?>">
 	<div class="popup">
 		<div class="popup-inner">
 			<button aria-label="<?php echo __('Popup schließen', 'nosun'); ?>" class="popup-close"></button>

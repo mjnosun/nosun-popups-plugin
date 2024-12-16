@@ -7,6 +7,38 @@ jQuery(document).ready(function($){
 	const $body = $("body");
 	const activeClass = "active";
 	const currentLanguage = $("html").attr("lang");
+	function getPopupSeen(id, language, storage) {
+		var item = "nosun_popup_"+id+"_lang-"+language+"_seen";
+		var seen = false;
+		switch ( storage ) {
+			case "session":
+				seen = sessionStorage.getItem(item);
+				break;
+			case "local":
+				seen = localStorage.getItem(item);
+				break;
+			case "none":
+			default:
+				seen = false;
+				break;
+		}
+		return seen;
+	}
+	function setPopupSeen(id, language, storage) {
+		console.log(id + " " + language + " " + storage);
+		var item = "nosun_popup_"+id+"_lang-"+language+"_seen";
+		switch ( storage ) {
+			case "session":
+				seen = sessionStorage.setItem(item, "true");
+				break;
+			case "local":
+				seen = localStorage.setItem(item, "true");
+				break;
+			case "none":
+			default:
+				break;
+		}
+	}
 
 	/* 
 	show popup
@@ -17,6 +49,7 @@ jQuery(document).ready(function($){
 			var $this = $(this);
 			const popupID = $this.attr("id").substr(6);
 			const triggerType = $this.data("trigger-type");
+			const storage = $(this).data('storage');
 			
 			/*
 			set popup elements
@@ -37,7 +70,7 @@ jQuery(document).ready(function($){
 			/*
 			check if session exists & trigger visibility
 			--------------------------------------------------------- */
-			if ( sessionStorage.getItem("nosun_popup_"+popupID+"_lang-"+currentLanguage+"_seen") != "true" ) {
+			if ( !getPopupSeen(popupID, currentLanguage, storage) ) {
 				// triggerType: time-delay
 				if ( triggerType == 'time-delay' ) {
 					var timeDelay = parseInt($this.data("time-delay"));
@@ -108,7 +141,7 @@ jQuery(document).ready(function($){
 			});
 		}
 	});
-	
+
 	/*
 	close popup when pressing escape
 	--------------------------------------------------------- */
@@ -126,7 +159,7 @@ jQuery(document).ready(function($){
 	$(".trap-focus").on("focus", function() {
 		$(".popup-wrapper").trigger("focus-inside", $(this).index() == 0 ? 'last' : 'first');
 	});
-	
+
 	/* 
 	close popup and set session
 	--------------------------------------------------------- */
@@ -143,7 +176,8 @@ jQuery(document).ready(function($){
 		}
 		targetPopup.removeClass(activeClass);
 		var popupID = targetPopup.attr("id").substr(6);
-		sessionStorage.setItem("nosun_popup_"+popupID+"_lang-"+currentLanguage+"_seen", "true");
+		var storage = targetPopup.data("storage");
+		setPopupSeen(popupID, currentLanguage, storage);
 	});
 	$(".popup-content-wrap a").click(function(e){
 		var targetPopup = $(this).closest(".popup-wrapper");
@@ -152,7 +186,8 @@ jQuery(document).ready(function($){
 		}
 		targetPopup.removeClass(activeClass);
 		var popupID = targetPopup.attr("id").substr(6);
-		sessionStorage.setItem("nosun_popup_"+popupID+"_lang-"+currentLanguage+"_seen", "true");
+		var storage = targetPopup.data("storage");
+		setPopupSeen(popupID, currentLanguage, storage);
 	});
 	
 	/* 
