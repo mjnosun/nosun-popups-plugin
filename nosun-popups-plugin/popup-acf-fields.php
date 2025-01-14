@@ -200,7 +200,7 @@ add_action( 'acf/include_fields', function() {
 		),
 		array(
 			'key' => 'field_6630823da1ad5',
-			'label' => 'Auslöser',
+			'label' => 'Verhalten',
 			'name' => '',
 			'aria-label' => '',
 			'type' => 'tab',
