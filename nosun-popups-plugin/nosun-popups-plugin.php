@@ -3,7 +3,7 @@
 Plugin Name: NOSUN Popups
 Plugin URI: https://github.com/mjnosun/nosun-popups-plugin
 Description: Custom Popups.
-Version: 0.0.3
+Version: 0.0.4
 Author: NOSUN MJ
 Author URI: https://www.no-sun.com
 License: GPLv2 or later
