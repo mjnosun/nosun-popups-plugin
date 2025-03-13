@@ -72,10 +72,7 @@ if ($popupQuery->have_posts()) :
 					// Handle specific_pages exclusion type
 					if ($exclusion_type === 'specific_pages') {
 						$excluded_posts = $rule['nts_pop_posts_excluded']; // Get excluded posts
-						echo 'exclusion type is posts/pages!';
-						echo '<pre>';
-						var_dump($excluded_posts);
-						echo '</pre>';
+						
 						if ($excluded_posts) {
 							// Add excluded post IDs to the exclusion array
 							$nts_pop_exclude_posts = array_merge($nts_pop_exclude_posts, $excluded_posts);
