@@ -3,7 +3,7 @@
 Plugin Name: NOSUN Popups
 Plugin URI: https://github.com/mjnosun/nosun-popups-plugin
 Description: Custom Popups.
-Version: 0.0.4
+Version: 0.0.5
 Author: NOSUN MJ
 Author URI: https://www.no-sun.com
 License: GPLv2 or later
@@ -11,7 +11,7 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain: nosun-popups-plugin
 Domain Path: /languages
 Requires at least: 6.5
-Tested up to: 6.7.1
+Tested up to: 6.7.2
 Requires PHP: 7.4
 Requires Plugins: advanced-custom-fields-pro
 */

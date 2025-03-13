@@ -30,11 +30,6 @@
 	background-image: url("../images/popup-bottom-bar.jpg");
 }
 /* contents layouts */
-.post-type-nos_popups .acf-tab-button[data-key="field_6718beae6a299"] {
-	font-size: 22px;
-	line-height: 1.2;
-}
 .post-type-nos_popups .acf-field.acf-field-flexible-content.acf-field-6718d156b85c9 .layout .acf-fc-layout-handle {
 	font-weight:bold;
-	
 }
