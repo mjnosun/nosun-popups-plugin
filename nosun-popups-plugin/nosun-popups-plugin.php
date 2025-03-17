@@ -182,8 +182,12 @@ if ( class_exists('ACF') ) {
 		if ( $column === 'nts_popup_status' ) {
 			if ( $popup_aktivieren ) {
 				$today = date('Y-m-d');
-				$popupDateBegin = $aktiv_von ? date('Y-m-d', strtotime($aktiv_von)) : null;
-				$popupDateEnd = $aktiv_bis ? date('Y-m-d', strtotime($aktiv_bis)) : null;
+				if ( get_field('nts_pop_timeframe', $post_id) ) {
+					$aktiv_von = get_field('nts_pop_timeframe', $post_id)['nts_pop_start_date'];
+					$aktiv_bis = get_field('nts_pop_timeframe', $post_id)['nts_pop_end_date'];
+				} else {
+					$aktiv_von = $aktiv_bis = false;
+				}
 				$is_active = true;
 				
 				// If both dates are set
