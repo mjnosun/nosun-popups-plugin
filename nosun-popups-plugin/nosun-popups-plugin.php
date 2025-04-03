@@ -19,7 +19,7 @@ Requires Plugins: advanced-custom-fields-pro
 /**
  * constants
  */
-define( 'PLUGIN_VERSION', '0.0.3' );
+define( 'PLUGIN_VERSION', '0.0.5' );
 define( 'PLUGIN_NAMESPACE', 'nosun-popups-plugin' );
 
 /**
@@ -176,22 +176,23 @@ if ( class_exists('ACF') ) {
 	function nosun_posts_custom_column_manage_nos_popups( $column ) {
 		$post_id = get_the_ID();
 		$popup_aktivieren = get_field('nts_pop_active', $post_id);
-		$aktiv_von = get_field('nts_pop_timeframe', $post_id)['nts_pop_start_date'];
-		$aktiv_bis = get_field('nts_pop_timeframe', $post_id)['nts_pop_end_date'];
+		if ( get_field('nts_pop_timeframe', $post_id) ) {
+			$aktiv_von = get_field('nts_pop_timeframe', $post_id)['nts_pop_start_date'];
+			$aktiv_bis = get_field('nts_pop_timeframe', $post_id)['nts_pop_end_date'];
+		} else {
+			$aktiv_von = $aktiv_bis = false;
+		}
+		
 	
 		if ( $column === 'nts_popup_status' ) {
 			if ( $popup_aktivieren ) {
 				$today = date('Y-m-d');
-				if ( get_field('nts_pop_timeframe', $post_id) ) {
-					$aktiv_von = get_field('nts_pop_timeframe', $post_id)['nts_pop_start_date'];
-					$aktiv_bis = get_field('nts_pop_timeframe', $post_id)['nts_pop_end_date'];
-				} else {
-					$aktiv_von = $aktiv_bis = false;
-				}
+				$popupDateBegin = $aktiv_von ? date('Y-m-d', strtotime($aktiv_von)) : null;
+				$popupDateEnd = $aktiv_bis ? date('Y-m-d', strtotime($aktiv_bis)) : null;
 				$is_active = true;
 				
 				// If both dates are set
-				if ( $popupDateBegin && $popupDateEnd ) {
+				if ( $aktiv_von && $aktiv_bis ) {
 					// Today is between aktiv_von and aktiv_bis (inclusive)
 					if ( $today >= $popupDateBegin && $today <= $popupDateEnd ) {
 						echo '<div style="color:#48C572;display:inline-flex;align-items:center;grid-gap:10px;"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#48C572" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-circle"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Aktiv</span></div>';
@@ -207,7 +208,7 @@ if ( class_exists('ACF') ) {
 					}
 				}
 				// Only aktiv_von is set, no aktiv_bis
-				elseif ( $popupDateBegin && !$popupDateEnd ) {
+				elseif ( $aktiv_von && !$aktiv_bis ) {
 					if ( $today >= $popupDateBegin ) {
 						echo '<div style="color:#48C572;display:inline-flex;align-items:center;grid-gap:10px;"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#48C572" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-circle"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Aktiv</span></div>';
 					} else {
@@ -215,7 +216,7 @@ if ( class_exists('ACF') ) {
 					}
 				}
 				// Only aktiv_bis is set, no aktiv_von
-				elseif ( !$popupDateBegin && $popupDateEnd ) {
+				elseif ( !$aktiv_von && $aktiv_bis ) {
 					if ( $today <= $popupDateEnd ) {
 						echo '<div style="color:#48C572;display:inline-flex;align-items:center;grid-gap:10px;"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#48C572" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-circle"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Aktiv</span></div>';
 					} else {
@@ -224,7 +225,7 @@ if ( class_exists('ACF') ) {
 					}
 				}
 				// No dates set but popup_aktivieren is true
-				elseif ( !$popupDateBegin && !$popupDateEnd ) {
+				elseif ( !$aktiv_von && !$aktiv_bis ) {
 					echo '<div style="color:#48C572;display:inline-flex;align-items:center;grid-gap:10px;"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#48C572" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-circle"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Aktiv</span></div>';
 				}
 			} else {

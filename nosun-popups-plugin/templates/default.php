@@ -56,8 +56,43 @@ $storage = get_field('nos_popup_storage')?:'session';
 										$colsizes = $content_block['nos_popup_layout_colsizes'];
 										$col_positions = $content_block['nos_popup_layout_image_text_positionierung'];
 										$image = $content_block['nos_popup_layout_image_text_image'];
+										$headline = $content_block['nos_popup_layout_text_headline'];
+										$headline_tag = $content_block['nos_popup_layout_text_headline_tag'];
+										switch ( $headline_tag ) {
+											case 'h1': $headlineHTMLTag = 'h1';break;
+											case 'h2': $headlineHTMLTag = 'h2';break;
+											case 'h3': $headlineHTMLTag = 'h3';break;
+											case 'h4': $headlineHTMLTag = 'h4';break;
+											case 'h5': $headlineHTMLTag = 'h5';break;
+											case 'h6': $headlineHTMLTag = 'h6';break;
+											// case 'p': $headlineHTMLTag = 'p';break;
+											// case 'span': $headlineHTMLTag = 'span';break;
+											// case 'div': $headlineHTMLTag = 'div';break;
+											default: $headlineHTMLTag = 'h2';
+										}
 										$text = $content_block['nos_popup_layout_image_text_text'];
 										$padding = $content_block['nos_popup_layout_image_text_innenabstand_textspalte'];
+										$add_button = $content_block['nos_popup_layout_text_add_button'];
+										if ( $add_button ) {
+											$button_text = $content_block['nos_popup_layout_text_button_text'];
+											$button_url = $content_block['nos_popup_layout_text_button_url'];
+											$button_attributes = $content_block['nos_popup_layout_text_button_attributes'];
+											$button_target = '';
+											$button_rel = '';
+											$rel_counter = 0;
+											foreach ( $button_attributes as $button_attr ) {
+												if ( $button_attr == 'blank' ) {
+													$button_target = ' target="_blank"';
+												} else {
+													$rel_counter++;
+													if ( $rel_counter == 1 ) {
+														$button_rel .= $button_attr;
+													} else {	
+														$button_rel .= ' ' . $button_attr;
+													}
+												}
+											}
+										}
 										switch ($colsizes) {
 											case "img-1-4-text-3-4":
 												$imageColClass = 'col-3';
@@ -85,22 +120,30 @@ $storage = get_field('nos_popup_storage')?:'session';
 										}
 										?>
 										<div class="pcb-image-text grid v-center">
-											<?php if ( $col_positions == 'image-right' ) { ?>
-												<div class="column pcb-text-col <?php echo $textColClass . ' p-' .$padding; ?>">
-													<?php if ( $text ) { ?>
-														<?php echo $text; ?>
+											<?php if ( $col_positions == 'image-left' ) { ?>
+												<div class="column pcb-image-col <?php echo $imageColClass; ?> cover">
+													<?php if ( $image ) { ?>
+														<?php echo wp_get_attachment_image($image, 'large'); ?>
 													<?php } ?>
 												</div>
 											<?php } ?>
-											<div class="column pcb-image-col <?php echo $imageColClass; ?> cover">
-												<?php if ( $image ) { ?>
-													<?php echo wp_get_attachment_image($image, 'large'); ?>
+											<div class="column pcb-text-col <?php echo $textColClass . ' p-' .$padding; ?>">
+												<?php if ( $headline ) { ?>
+													<div class="popup-headline-container">
+														<span class="popup-headline <?php echo $headlineHTMLTag;?>"><?php echo nl2br($headline); ?></span>
+													</div>
+												<?php } ?>
+												<?php if ( $text ) { ?>
+													<div class="wysiwyg"><?php echo $text; ?></div>
+												<?php } ?>
+												<?php if ( $add_button ) { ?>
+													<a href="<?php echo $button_url; ?>" class="button primary filled"<?php echo $button_target; ?> rel="<?php echo $button_rel; ?>"><?php echo $button_text; ?></a>
 												<?php } ?>
 											</div>
-											<?php if ( $col_positions == 'image-left' ) { ?>
-												<div class="column pcb-text-col <?php echo $textColClass . ' p-' .$padding; ?>">
-													<?php if ( $text ) { ?>
-														<?php echo $text; ?>
+											<?php if ( $col_positions == 'image-right' ) { ?>
+												<div class="column pcb-image-col <?php echo $imageColClass; ?> cover">
+													<?php if ( $image ) { ?>
+														<?php echo wp_get_attachment_image($image, 'large'); ?>
 													<?php } ?>
 												</div>
 											<?php } ?>
@@ -108,13 +151,56 @@ $storage = get_field('nos_popup_storage')?:'session';
 									<?php } else { ?>
 										<?php
 										$padding = $content_block['nos_popup_layout_text_innenabstand_textspalte'];
+										$headline = $content_block['nos_popup_layout_text_headline'];
+										$headline_tag = $content_block['nos_popup_layout_text_headline_tag'];
+										switch ( $headline_tag ) {
+											case 'h1': $headlineHTMLTag = 'h1';break;
+											case 'h2': $headlineHTMLTag = 'h2';break;
+											case 'h3': $headlineHTMLTag = 'h3';break;
+											case 'h4': $headlineHTMLTag = 'h4';break;
+											case 'h5': $headlineHTMLTag = 'h5';break;
+											case 'h6': $headlineHTMLTag = 'h6';break;
+											// case 'p': $headlineHTMLTag = 'p';break;
+											// case 'span': $headlineHTMLTag = 'span';break;
+											// case 'div': $headlineHTMLTag = 'div';break;
+											default: $headlineHTMLTag = 'h2';
+										}
 										$text = $content_block['nos_popup_layout_text_text'];
+										$add_button = $content_block['nos_popup_layout_text_add_button'];
+										if ( $add_button ) {
+											$button_text = $content_block['nos_popup_layout_text_button_text'];
+											$button_url = $content_block['nos_popup_layout_text_button_url'];
+											$button_attributes = $content_block['nos_popup_layout_text_button_attributes'];
+											$button_target = '';
+											$button_rel = '';
+											$rel_counter = 0;
+											foreach ( $button_attributes as $button_attr ) {
+												if ( $button_attr == 'blank' ) {
+													$button_target = ' target="_blank"';
+												} else {
+													$rel_counter++;
+													if ( $rel_counter == 1 ) {
+														$button_rel .= $button_attr;
+													} else {	
+														$button_rel .= ' ' . $button_attr;
+													}
+												}
+											}
+										}
 										?>
-										<?php if ( $text ) { ?>
-											<div class="popup-text-wrapper p-<?php echo $padding; ?>">
-												<?php echo $text; ?>
-											</div>
-										<?php } ?>
+										<div class="popup-text-wrapper p-<?php echo $padding; ?>">
+											<?php if ( $headline ) { ?>
+												<div class="popup-headline-container">
+													<span class="popup-headline <?php echo $headlineHTMLTag;?>"><?php echo nl2br($headline); ?></span>
+												</div>
+											<?php } ?>
+											<?php if ( $text ) { ?>
+												<div class="wysiwyg"><?php echo $text; ?></div>
+											<?php } ?>
+											<?php if ( $add_button ) { ?>
+												<a href="<?php echo $button_url; ?>" class="button primary filled"<?php echo $button_target; ?> rel="<?php echo $button_rel; ?>"><?php echo $button_text; ?></a>
+											<?php } ?>
+										</div>
 									<?php } ?>
 								</div>
 							<?php } ?>
