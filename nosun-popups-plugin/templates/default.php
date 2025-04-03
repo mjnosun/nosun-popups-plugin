@@ -35,7 +35,7 @@ $storage = get_field('nos_popup_storage')?:'session';
 	<div tabindex="0" class="trap-focus"></div>
 	<div class="popup" role="dialog" aria-modal="true" aria-label="<?= get_the_title() ?>">
 		<div class="popup-inner">
-			<button aria-label="<?php echo __('Popup schließen', 'nosun'); ?>" class="popup-close"></button>
+			<button aria-label="<?php echo __('Popup schließen', 'nosun'); ?>" class="popup-close" id="popup-cl-<?php the_ID(); ?>"></button>
 			<div class="popup-content-wrap">
 				<div class="popup-content-inner">
 					<div class="wysiwyg popup-content">

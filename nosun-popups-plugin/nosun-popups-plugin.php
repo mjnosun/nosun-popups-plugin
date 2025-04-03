@@ -3,7 +3,7 @@
 Plugin Name: NOSUN Popups
 Plugin URI: https://github.com/mjnosun/nosun-popups-plugin
 Description: Custom Popups.
-Version: 0.0.5
+Version: 0.0.7
 Author: NOSUN MJ
 Author URI: https://www.no-sun.com
 License: GPLv2 or later
@@ -16,15 +16,17 @@ Requires PHP: 7.4
 Requires Plugins: advanced-custom-fields-pro
 */
 
-/**
- * constants
- */
-define( 'PLUGIN_VERSION', '0.0.5' );
+/* -------------------------------------------------
+constants
+------------------------------------------------- */
+define( 'PLUGIN_VERSION', '0.0.7' );
 define( 'PLUGIN_NAMESPACE', 'nosun-popups-plugin' );
 
-/**
- * enqueue FRONTEND styles & scripts
- */
+$load_per_ajax = true;
+
+/* -------------------------------------------------
+enqueue FRONTEND styles & scripts
+------------------------------------------------- */
 add_action( 'wp_enqueue_scripts', 'nos_popups_enqueue' );
 function nos_popups_enqueue() {
 	// styles
@@ -35,9 +37,9 @@ function nos_popups_enqueue() {
 	// scripts
 	wp_enqueue_script('nos-popups-plugin-js', plugin_dir_url( __FILE__ ) . 'assets/js/popups-main.js', array('jquery'), PLUGIN_VERSION, array('in_footer' => true));
 }
-/**
- * enqueue BACKEND styles & scripts
- */
+/* -------------------------------------------------
+enqueue BACKEND styles & scripts
+------------------------------------------------- */
 function nos_popups_backend_enqueue() {
 	// styles
 	wp_enqueue_style('popups-backend-css', plugin_dir_url( __FILE__ ) . 'assets/css/popups-backend.css', false, PLUGIN_VERSION, 'all');
@@ -46,13 +48,13 @@ function nos_popups_backend_enqueue() {
 }
 add_action( 'admin_enqueue_scripts', 'nos_popups_backend_enqueue' );
 
-/**
- * init
- */
+/* -------------------------------------------------
+init
+------------------------------------------------- */
 function nos_popups_init() {
-	/**
-	 * register popups post type
-	 */
+	/* -------------------------------------------------
+	register popups post type
+	------------------------------------------------- */
 	register_post_type(
 		'nos_popups', 
 		array(	
@@ -95,17 +97,17 @@ function nos_popups_init() {
 	
 	if (class_exists('WPSEO_Options')) {
 		
-		/**
-		* Exclude nos_popups cpt from XML sitemaps.
-		*/
+		/* -------------------------------------------------
+		Exclude nos_popups cpt from XML sitemaps.
+		------------------------------------------------- */
 		function sitemap_exclude_post_type( $excluded, $post_type ) {
 			return $post_type === 'nos_popups';
 		}
 		add_filter( 'wpseo_sitemap_exclude_post_type', 'sitemap_exclude_post_type', 10, 2 );
 		
-		/**
-		 * remove YOAST SEO Meta Box for nos_popups cpts
-		 */
+		/* -------------------------------------------------
+		remove YOAST SEO Meta Box for nos_popups cpts
+		------------------------------------------------- */
 		function my_remove_wp_seo_meta_box() {
 			remove_meta_box('wpseo_meta', 'nos_popups', 'normal');
 		}
@@ -115,9 +117,9 @@ function nos_popups_init() {
 }
 add_action( 'init', 'nos_popups_init');
 
-/**
- * custom single post template if not found in theme folders
- */
+/* -------------------------------------------------
+custom single post template if not found in theme folders
+------------------------------------------------- */
 function load_popups_single_template( $template ) {
 	global $post;
 	if ( 'nos_popups' === $post->post_type && locate_template( array( 'single-nos_popups.php' ) ) !== $template ) {
@@ -127,9 +129,9 @@ function load_popups_single_template( $template ) {
 }
 add_filter( 'single_template', 'load_popups_single_template' );
 
-/**
- * get current language slug
- */
+/* -------------------------------------------------
+get current language slug
+------------------------------------------------- */
 if (!function_exists('get_current_language_slug')) {
 	function get_current_language_slug() {
 		// Check if Polylang is active and use it to get the current language slug.
@@ -151,18 +153,18 @@ if (!function_exists('get_current_language_slug')) {
 	}
 }
 
-/**
- * add backend admin columns
- */
+/* -------------------------------------------------
+add backend admin columns
+------------------------------------------------- */
 if ( class_exists('ACF') ) {
-	/**
-	 * include acf fields
-	 */
+	/* -------------------------------------------------
+	include acf fields
+	------------------------------------------------- */
 	require_once(plugin_dir_path( __FILE__ ) . 'popup-acf-fields.php');
 	
-	/**
-	 * Add custom columns to popups post list admin column
-	 */
+	/* -------------------------------------------------
+	add custom columns to popups post list admin column
+	------------------------------------------------- */
 	function nosun_posts_column_views( $columns ) {
 		$columns['nts_popup_status'] = __('Popup Status', PLUGIN_NAMESPACE);
 		$columns['nts_popup_from'] = __('Aktiv von', PLUGIN_NAMESPACE);
@@ -170,9 +172,9 @@ if ( class_exists('ACF') ) {
 		return $columns;
 	}
 	
-	/**
-	 * input the data into popup admin columns
-	 */
+	/* -------------------------------------------------
+	input the data into popup admin columns
+	------------------------------------------------- */
 	function nosun_posts_custom_column_manage_nos_popups( $column ) {
 		$post_id = get_the_ID();
 		$popup_aktivieren = get_field('nts_pop_active', $post_id);
@@ -323,11 +325,32 @@ if ( class_exists('ACF') ) {
 	}
 }
 
+/* -------------------------------------------------
+insert popup html into body
+------------------------------------------------- */
+if ( $load_per_ajax ) {
+	// use AJAX to output popup content
+	function nos_load_popup_ajax() {
+		include_once(WP_PLUGIN_DIR . '/nosun-popups-plugin/templates/loop.php');
+		wp_die();
+	}
+	add_action('wp_ajax_nos_load_popup', 'nos_load_popup_ajax');
+	add_action('wp_ajax_nopriv_nos_load_popup', 'nos_load_popup_ajax');
+	
+	// enqueue ajax js
+	function nos_enqueue_popup_ajax_script() {
+		wp_enqueue_script('nos-popup-ajax',  plugin_dir_url( __FILE__ ) . 'assets/js/popups-ajax.js', array(), PLUGIN_VERSION, true);
+		wp_localize_script('nos-popup-ajax', 'nosPopupAjax', array(
+			'ajaxurl' => '/wp-admin/admin-ajax.php',
+			'load_per_ajax' => true,
+		));
+	}
+	add_action('wp_enqueue_scripts', 'nos_enqueue_popup_ajax_script');
 
-/**
- * insert popup html into body
- */
-function nos_popup_content_after_body_open_tag() {
-	include_once(WP_PLUGIN_DIR . '/nosun-popups-plugin/templates/loop.php');
+} else {
+	// use default after_body_open
+	function nos_popup_content_after_body_open_tag() {
+		include_once(WP_PLUGIN_DIR . '/nosun-popups-plugin/templates/loop.php');
+	}
+	add_action('wp_body_open', 'nos_popup_content_after_body_open_tag');
 }
-add_action('wp_body_open', 'nos_popup_content_after_body_open_tag');

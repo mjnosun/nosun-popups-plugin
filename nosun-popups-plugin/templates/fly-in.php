@@ -34,7 +34,7 @@ $storage = get_field('nos_popup_storage')?:'session';
 <div class="popup-wrapper popup-count-<?php echo $itemCount.' popup-style-'.$popup_style.'' . ( is_singular('nos_popups') ? ' active' : '' ); ?>" id="popup-<?php the_ID(); ?>" data-trigger-type="<?php echo $triggerType; ?>"<?php echo $triggerConAttr; ?> data-storage="<?= $storage ?>">
 	<div class="popup">
 		<div class="popup-inner">
-			<button aria-label="<?php echo __('Popup schließen', 'nosun'); ?>" class="popup-close"></button>
+			<button aria-label="<?php echo __('Popup schließen', 'nosun'); ?>" class="popup-close" id="popup-cl-<?php the_ID(); ?>"></button>
 			<div class="popup-content-wrap">
 				<div class="popup-content-inner">
 					<div class="wysiwyg popup-content">

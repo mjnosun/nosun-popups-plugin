@@ -21,7 +21,7 @@
 	height: 100%;
 	z-index: 1040;
 	background-color: rgba(0,0,0,.5);
-	transition: var(--a-timing-default, .2s) var(--a-easing-default, ease);
+	transition: all var(--a-timing-default, .2s) var(--a-easing-default, ease);
 	opacity: 0;
 	pointer-events: none;
 	visibility: hidden;
