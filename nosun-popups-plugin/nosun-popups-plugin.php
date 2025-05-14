@@ -55,45 +55,51 @@ function nos_popups_init() {
 	/* -------------------------------------------------
 	register popups post type
 	------------------------------------------------- */
-	register_post_type(
-		'nos_popups', 
-		array(	
-			'label' => 'Popups',
-			'description' => 'Popups',
-			'public' => true,
-			'show_ui' => true,
-			'show_in_menu' => true,
-			'capability_type' => 'post',
-			'exclude_from_search' => true,
-			'hierarchical' => true,
-			'rewrite' => array('slug' => 'nos_popups'),
-			'query_var' => true,
-			'has_archive' => false,
-			'show_in_nav_menus' => false,
-			'menu_icon' => 'dashicons-pressthis',
-			'supports' => array(
-				'title',
-				'revisions',
-				'custom-fields',
-			),
-			'labels' => array (
-				'name' => 'Popups',
-				'singular_name' => 'Popup',
-				'menu_name' => 'Popups',
-				'add_new' => 'Popups anlegen',
-				'add_new_item' => 'Neues Popup anlegen',
-				'edit' => 'Popups bearbeiten',
-				'edit_item' => 'Popup bearbeiten',
-				'new_item' => 'Neues Popup',
-				'view' => 'Popups anzeigen',
-				'view_item' => 'Popup anzeigen',
-				'search_items' => 'Popups durchsuchen',
-				'not_found' => 'Keine Popups gefunden',
-				'not_found_in_trash' => 'Keine Popups im Papierkorb gefunden',
-				'parent' => 'Eltern Popup'
-			)
+	register_post_type('nos_popups', array(
+		'label' => 'Popups',
+		'description' => 'Popups',
+		
+		// PUBLIC SETTINGS
+		'public' => false, // Very important: hides from front-end
+		'publicly_queryable' => true, // Still allows querying in templates
+		'exclude_from_search' => true,
+		'show_in_nav_menus' => false,
+		
+		// ADMIN UI SETTINGS
+		'show_ui' => true,
+		'show_in_menu' => true,
+	
+		// OTHER BEHAVIOR
+		'capability_type' => 'post',
+		'hierarchical' => false,
+		'has_archive' => false,
+		'rewrite' => false, // Optional: disables custom rewrite rules
+		'query_var' => true,
+		'menu_icon' => 'dashicons-pressthis',
+		'supports' => array(
+			'title',
+			'revisions',
+			'custom-fields',
+		),
+	
+		// LABELS
+		'labels' => array(
+			'name' => 'Popups',
+			'singular_name' => 'Popup',
+			'menu_name' => 'Popups',
+			'add_new' => 'Popups anlegen',
+			'add_new_item' => 'Neues Popup anlegen',
+			'edit' => 'Popups bearbeiten',
+			'edit_item' => 'Popup bearbeiten',
+			'new_item' => 'Neues Popup',
+			'view' => 'Popups anzeigen',
+			'view_item' => 'Popup anzeigen',
+			'search_items' => 'Popups durchsuchen',
+			'not_found' => 'Keine Popups gefunden',
+			'not_found_in_trash' => 'Keine Popups im Papierkorb gefunden',
+			'parent' => 'Eltern Popup'
 		)
-	);
+	));
 	
 	if (class_exists('WPSEO_Options')) {
 		
