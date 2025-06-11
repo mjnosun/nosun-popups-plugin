@@ -17,6 +17,12 @@ if ( is_singular('nos_popups') ) {
 		'order' => 'ASC',
 		'posts_per_page' => -1,
 	);
+	
+	// Add language parameter if Polylang is active
+	if (function_exists('pll_current_language')) {
+		$popupArgs['lang'] = pll_current_language();
+	}
+	
 	if ( class_exists('ACF') ) {
 		$acf_meta_query = array(
 			array(
