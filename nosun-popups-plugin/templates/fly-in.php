@@ -63,9 +63,6 @@ $storage = get_field('nos_popup_storage')?:'session';
 											case 'h4': $headlineHTMLTag = 'h4';break;
 											case 'h5': $headlineHTMLTag = 'h5';break;
 											case 'h6': $headlineHTMLTag = 'h6';break;
-											// case 'p': $headlineHTMLTag = 'p';break;
-											// case 'span': $headlineHTMLTag = 'span';break;
-											// case 'div': $headlineHTMLTag = 'div';break;
 											default: $headlineHTMLTag = 'h2';
 										}
 										$add_button = $content_block['nos_popup_layout_text_add_button'];

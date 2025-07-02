@@ -326,58 +326,40 @@ if ( class_exists('ACF') ) {
 /* -------------------------------------------------
 insert popup html into body
 ------------------------------------------------- */
-// function nosun_determine_loading_method() {
-// 	// Default to AJAX loading
-// 	$load_per_ajax = true;
-// 	
-// 	// Only check singular condition after 'wp' hook when query is ready
-// 	if (did_action('wp')) {
-// 		if (is_singular('nos_popups')) {
-// 			$load_per_ajax = false;
-// 		}
-// 	}
-// 	
-// 	return $load_per_ajax;
-// }
-
-// Hook after query is parsed
-// add_action('wp', function() {
-	// $load_per_ajax = nosun_determine_loading_method();
-$load_per_ajax = false;
-
-if ($load_per_ajax) {
-	// never use ajax on single
-	if ( is_singular('nos_popups') ) {
-		// Normal loading (no AJAX)
-		function nos_popup_content_after_body_open_tag() {
-			include_once(WP_PLUGIN_DIR . '/nosun-popups-plugin/templates/loop.php');
-		}
-		add_action('wp_body_open', 'nos_popup_content_after_body_open_tag', 5);
-	} else {
-		// use AJAX to output popup content
-		function nos_load_popup_ajax() {
-			include_once(WP_PLUGIN_DIR . '/nosun-popups-plugin/templates/loop.php');
-			wp_die();
-		}
-		add_action('wp_ajax_nos_load_popup', 'nos_load_popup_ajax');
-		add_action('wp_ajax_nopriv_nos_load_popup', 'nos_load_popup_ajax');
-		
-		// enqueue ajax js
-		function nos_enqueue_popup_ajax_script() {
-			wp_enqueue_script('nos-popup-ajax',  plugin_dir_url( __FILE__ ) . 'assets/js/popups-ajax.js', array(), PLUGIN_VERSION, true);
-			wp_localize_script('nos-popup-ajax', 'nosPopupAjax', array(
-				'ajaxurl' => '/wp-admin/admin-ajax.php',
-				'load_per_ajax' => true,
-				'post_id' => get_the_ID(),
-			));
-		}
-		add_action('wp_enqueue_scripts', 'nos_enqueue_popup_ajax_script');
-	}
-} else {
-	// Normal loading (no AJAX)
-	function nos_popup_content_after_body_open_tag() {
-		include_once(WP_PLUGIN_DIR . '/nosun-popups-plugin/templates/loop.php');
-	}
-	add_action('wp_body_open', 'nos_popup_content_after_body_open_tag', 5);
+function nos_popup_content_after_body_open_tag() {
+	include_once(WP_PLUGIN_DIR . '/nosun-popups-plugin/templates/loop.php');
 }
-// }, 5);
+add_action('wp_body_open', 'nos_popup_content_after_body_open_tag', 5);
+
+/* -------------------------------------------------
+flush all caches on post save
+------------------------------------------------- */
+add_action('save_post_nos_popups', 'flush_all_caches_on_popup_save', 10, 3);
+function flush_all_caches_on_popup_save($post_id, $post, $update) {
+	// WP Rocket
+	if (function_exists('rocket_clean_domain')) {
+		rocket_clean_domain();
+	}
+	
+	// W3 Total Cache
+	if (function_exists('w3tc_flush_all')) {
+		w3tc_flush_all();
+	}
+	
+	// WP Super Cache
+	if (function_exists('wp_cache_clean_cache')) {
+		global $file_prefix;
+		wp_cache_clean_cache($file_prefix);
+	}
+	
+	// LiteSpeed Cache
+	if (has_action('litespeed_purge_all')) {
+		do_action('litespeed_purge_all');
+	}
+	
+	// Clear object cache
+	wp_cache_flush();
+	
+	// Additional hook for other plugins
+	do_action('nos_popups_flush_cache');
+}

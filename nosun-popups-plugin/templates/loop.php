@@ -65,6 +65,7 @@ if ($popupQuery->have_posts()) :
 			$nts_pop_show_everywhere = get_field('nts_pop_show_everywhere');
 			$popup_aktivieren = get_field('nts_pop_active');
 
+			// inclusion rules
 			if (!$nts_pop_show_everywhere) {
 				$inclusion_rules = get_field('field_nts_pop_visibility_rules');
 				if ($inclusion_rules) {
@@ -80,8 +81,7 @@ if ($popupQuery->have_posts()) :
 				}
 			}
 			
-			
-			// Process exclusion rules (repeater field)
+			// exclusion rules
 			$exclusion_rules = get_field('nts_pop_exclusion_rules');
 			if ($exclusion_rules) {
 				foreach ($exclusion_rules as $rule) {
@@ -162,24 +162,6 @@ if ($popupQuery->have_posts()) :
 			// Show on specific posts where visibility matches, date condition is true, and not excluded
 			echo $popupContent;
 		}
-		// 1. ALWAYS show on singular popup pages (ignore all other conditions)
-		// if (is_singular('nos_popups')) {
-		// 	echo $popupContent;
-		// } else {
-		// 	// 2. Fallback if ACF is not installed
-		// 	if (!class_exists('ACF')) {
-		// 		echo $popupContent;
-		// 	}
-		// 	// 3. Normal behavior for other pages
-		// 	elseif (!$is_excluded && $popup_aktivieren && $condition_date) {
-		// 		// Show if:
-		// 		// - "Show everywhere" is ON, **OR**
-		// 		// - Current post is in the included list
-		// 		if ($nts_pop_show_everywhere || in_array($currentPagePostID, $nts_pop_include_posts)) {
-		// 			echo $popupContent;
-		// 		}
-		// 	}
-		// }
 		
 	endwhile;
 endif;
