@@ -170,4 +170,5 @@ jQuery(document).ready(function($) {
 			}
 		});
 	}
+	
 });

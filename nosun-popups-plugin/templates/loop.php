@@ -2,13 +2,21 @@
 defined('ABSPATH') OR exit;
 
 $today_time = current_time('Ymd');
-$currentPagePostID = get_the_ID();
+global $post;
+$currentPagePostID = isset($_POST['post_id']) ? intval($_POST['post_id']) :
+					 (isset($post->ID) ? intval($post->ID) :
+					 (get_the_ID() ? intval(get_the_ID()) : false));
+
 if ( is_singular('nos_popups') ) {
 	$popupArgs = array(
 		'post_type' => 'nos_popups',
 		'post_status' => 'any',
 		'p' => $currentPagePostID,
 	);
+	// Add language parameter if Polylang is active
+	if (function_exists('pll_current_language')) {
+		$popupArgs['lang'] = pll_current_language();
+	}
 } else {
 	$popupArgs = array(
 		'post_type' => 'nos_popups',
@@ -49,24 +57,30 @@ if ($popupQuery->have_posts()) :
 
 		// Initialize ACF-related variables
 		$nts_pop_show_everywhere = false;
-		$nts_pop_include_posts = []; // Will store post IDs for inclusion
-		$nts_pop_exclude_posts = [];  // Will store post IDs for exclusion
-		$popup_style = 'default';     // Default template
+		$nts_pop_include_posts = [];
+		$nts_pop_exclude_posts = [];
+		$popup_style = 'default';
 
 		if (class_exists('ACF')) {
 			$nts_pop_show_everywhere = get_field('nts_pop_show_everywhere');
-			$popup_aktivieren = get_field('nts_pop_active'); // Get popup activation status
+			$popup_aktivieren = get_field('nts_pop_active');
 
-			// Only fetch these fields if $nts_pop_show_everywhere is false
 			if (!$nts_pop_show_everywhere) {
-				// Get included posts (if any)
-				$included_posts = get_field('nts_pop_visibility'); // Assuming this is a post_object field
-				if ($included_posts) {
-					$nts_pop_include_posts = array_map(function($post) {
-						return $post->ID; // Extract post IDs from post objects
-					}, $included_posts);
+				$inclusion_rules = get_field('field_nts_pop_visibility_rules');
+				if ($inclusion_rules) {
+					foreach ($inclusion_rules as $rule) {
+						$inclusion_type = $rule['rule_type'];
+						if ($inclusion_type === 'specific_pages') {
+							$included_posts = $rule['nts_pop_posts_included'];
+							if ($included_posts) {
+								$nts_pop_include_posts = array_map('intval', $included_posts);
+							}
+						}
+					}
 				}
 			}
+			
+			
 			// Process exclusion rules (repeater field)
 			$exclusion_rules = get_field('nts_pop_exclusion_rules');
 			if ($exclusion_rules) {
@@ -99,7 +113,7 @@ if ($popupQuery->have_posts()) :
 				$endDate = $endDate ? date('Y-m-d', strtotime($endDate)) : null;
 			}
 
-			$popup_style = get_field('nts_pop_style') ?: 'default'; // Fallback to default template
+			$popup_style = get_field('nts_pop_style') ?: 'default';
 		}
 
 		// Prepare date condition
@@ -135,8 +149,11 @@ if ($popupQuery->have_posts()) :
 		$is_excluded = !empty($nts_pop_exclude_posts) && in_array($currentPagePostID, $nts_pop_exclude_posts);
 
 		// Output content if conditions are met
-		if (is_singular('nos_popups') || !class_exists('ACF')) {
-			// Output popup for the singular 'nos_popups' post type or if ACF isn't available
+		if (is_singular('nos_popups')) {
+			// Always show on single popup pages, ignore all other conditions
+			echo $popupContent;
+		} elseif (!class_exists('ACF')) {
+			// Fallback if ACF is not active
 			echo $popupContent;
 		} elseif (!$is_excluded && $nts_pop_show_everywhere && $condition_date) {
 			// Show everywhere if enabled, date condition is true, and not excluded
@@ -145,6 +162,25 @@ if ($popupQuery->have_posts()) :
 			// Show on specific posts where visibility matches, date condition is true, and not excluded
 			echo $popupContent;
 		}
+		// 1. ALWAYS show on singular popup pages (ignore all other conditions)
+		// if (is_singular('nos_popups')) {
+		// 	echo $popupContent;
+		// } else {
+		// 	// 2. Fallback if ACF is not installed
+		// 	if (!class_exists('ACF')) {
+		// 		echo $popupContent;
+		// 	}
+		// 	// 3. Normal behavior for other pages
+		// 	elseif (!$is_excluded && $popup_aktivieren && $condition_date) {
+		// 		// Show if:
+		// 		// - "Show everywhere" is ON, **OR**
+		// 		// - Current post is in the included list
+		// 		if ($nts_pop_show_everywhere || in_array($currentPagePostID, $nts_pop_include_posts)) {
+		// 			echo $popupContent;
+		// 		}
+		// 	}
+		// }
+		
 	endwhile;
 endif;
 wp_reset_postdata();

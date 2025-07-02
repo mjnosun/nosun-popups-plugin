@@ -2,6 +2,10 @@
 if ( is_user_logged_in() ) {
 	get_header();
 	if ( have_posts() ) : while ( have_posts() ) : the_post();
+	$popup_style = get_field('nts_pop_style') ?: 'default';
+	
+	include(WP_PLUGIN_DIR . '/nosun-popups-plugin/templates/' . $popup_style . '.php');
+	
 	echo '<div class="single-popup-content-container">';
 		echo '<div class="container" style="text-align:center;">';
 			echo '<div class="nosun-widget widget-spacer spacer-size-xxl"></div>';

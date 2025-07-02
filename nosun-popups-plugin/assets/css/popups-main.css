@@ -1,5 +1,7 @@
 /* Popups
 --------------------------------------------------------- */
+body.single-nos_popups > .popup-bg,
+body.single-nos_popups > .popup-wrapper,
 .elementor-editor-active:not(.single-nos_popups) .popup-wrapper,
 .elementor-editor-active:not(.single-nos_popups) .popup-bg {
 	display: none !important;
