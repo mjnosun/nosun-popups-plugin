@@ -206,6 +206,9 @@ html[data-color-theme="dark"] {
 }
 
 /* layouts templates */
+.pcb-image-col {
+	height: 100%;
+}
 .pcb-image-col img,
 .popup-image-wrapper img {
 	width:100%;
