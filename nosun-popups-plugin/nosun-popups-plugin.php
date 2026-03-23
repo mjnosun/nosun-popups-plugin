@@ -286,7 +286,7 @@ if ( class_exists('ACF') ) {
 			$popupDateBegin = $aktiv_von ? date('Y-m-d', strtotime($aktiv_von)) : null;
 			$popupDateEnd = $aktiv_bis ? date('Y-m-d', strtotime($aktiv_bis)) : null;
 			
-			if ( $today > $popupDateEnd ) {
+			if ( $popupDateEnd && $today > $popupDateEnd ) {
 				echo '<span style="color: #C84630;">Vergangen: <br>';
 			} else {
 				echo '<span>';
