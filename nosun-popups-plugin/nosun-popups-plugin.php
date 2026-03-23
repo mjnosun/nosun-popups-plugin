@@ -568,29 +568,101 @@ schickt daten an ressourcen.your-project.at
 checkt, wo welche Plugin Version aktiv ist
 ------------------------------------------------- */
 if ( is_admin() ) {
+	/* -------------------------------------------------
+	Listen for the Reset Button Click
+	------------------------------------------------- */
+	add_action( 'admin_init', function() {
+		// Check if our specific reset button was clicked
+		if ( isset($_GET['nos_sync_audit']) && check_admin_referer('nos_audit_sync_action') ) {
+			
+			// 1. Delete the 24-hour lock
+			delete_transient( 'nos_popups_plugin_version_report' );
+			
+			// 2. Trigger the report function manually (we define this below)
+			nos_popups_send_audit_report();
+			
+			// 3. Redirect back to the settings page with a success message
+			wp_redirect( admin_url( 'edit.php?post_type=nos_popups&page=nos-general-popup-settings&nos_sync_complete=1' ) );
+			exit;
+		}
+	});
+
+	/* -------------------------------------------------
+	Standard Daily Report Hook
+	------------------------------------------------- */
 	add_action( 'admin_init', function() {
 		if ( false === get_transient( 'nos_popups_plugin_version_report' ) ) {
-			
-			if ( ! function_exists( 'get_plugin_data' ) ) {
-				require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
-			}
-			$plugin_data = get_plugin_data( __FILE__ );
-			$current_version = $plugin_data['Version'];
+			nos_popups_send_audit_report();
+		}
+	});
+}
 
-			wp_remote_post( 'https://ressourcen.your-project.at/wp-json/nosun-popups-plugin/v1/report', [
-				'blocking'  => false, 
-				'timeout'   => 5,
-			'headers'   => [
-				'Content-Type' => 'application/json',
-			],
-			'body'      => wp_json_encode( [
-				'site_url' => get_site_url(),
-				'version'  => $current_version,
-				'api_key'  => 'sk_nosun_popups_nOqe5aNJc6AgWZV8lKEQAYGIgvWxpjwK'
-			] )
-		]);
-
-		set_transient( 'nos_popups_plugin_version_report', true, DAY_IN_SECONDS );
+/* -------------------------------------------------
+The Actual Reporting Function (Re-usable)
+------------------------------------------------- */
+function nos_popups_send_audit_report() {
+	if ( ! function_exists( 'get_plugin_data' ) ) {
+		require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
 	}
-});
+	
+	$plugin_data = get_plugin_data( __FILE__ );
+	$current_version = $plugin_data['Version'];
+
+	wp_remote_post( 'https://ressourcen.your-project.at/wp-json/nosun-popups-plugin/v1/report', [
+		'blocking'  => false,
+		'timeout'   => 5,
+		'body'      => [
+			'site_url' => get_site_url(),
+			'version'  => $current_version,
+			'api_key'  => 'sk_nosun_popups_nOqe5aNJc6AgWZV8lKEQAYGIgvWxpjwK'
+		]
+	]);
+
+	set_transient( 'nos_popups_plugin_version_report', true, DAY_IN_SECONDS );
+}
+
+/* -------------------------------------------------
+Add Sync Button to the TOP of the ACF Options Page
+------------------------------------------------- */
+add_action('acf/input/admin_head', 'nos_popups_add_sync_ui');
+
+function nos_popups_add_sync_ui() {
+	// Only on the right admin page
+	if (
+		! is_admin()
+		|| ! isset($_GET['post_type'], $_GET['page'])
+		|| $_GET['post_type'] !== 'nos_popups'
+		|| $_GET['page'] !== 'nos-general-popup-settings'
+	) {
+		return;
+	}
+
+	// Success notice
+	if (isset($_GET['nos_sync_complete'])) {
+		add_action('admin_notices', function() {
+			echo '<div class="notice notice-success is-dismissible"><p>✓ <strong>Audit-Sync:</strong> Die Plugin-Version wurde erfolgreich an den Ressourcen-Server gemeldet.</p></div>';
+		});
+	}
+
+	$sync_url = wp_nonce_url(
+		admin_url('edit.php?post_type=nos_popups&page=nos-general-popup-settings&nos_sync_audit=1'),
+		'nos_audit_sync_action'
+	);
+
+	add_action('admin_notices', function() use ($sync_url) {
+		?>
+		<div class="nos-sync-banner" style="background:#fff;border:1px solid #ccd0d4;padding:15px;margin:15px 0;display:flex;align-items:center;justify-content:space-between;border-radius:4px;box-shadow:0 1px 1px rgba(0,0,0,0.04);">
+			<div>
+				<strong style="display:block;font-size:14px;">Audit Dashboard Sync</strong>
+				<span style="color:#646970;font-size:12px;">
+					Aktualisiert die Versionsinfo (v<?php echo esc_html(PLUGIN_VERSION); ?>) auf dem zentralen Dashboard.
+				</span>
+			</div>
+			<a href="<?php echo esc_url($sync_url); ?>" class="button button-secondary">
+				<span class="dashicons dashicons-update" style="vertical-align:middle;margin-top:4px;"></span>
+				Jetzt synchronisieren
+			</a>
+		</div>
+		<?php
+	});
 }
