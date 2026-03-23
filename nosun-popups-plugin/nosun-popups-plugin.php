@@ -19,7 +19,7 @@ Requires Plugins: advanced-custom-fields-pro
 /* -------------------------------------------------
 constants
 ------------------------------------------------- */
-define( 'PLUGIN_VERSION', '2.0.3' );
+define( 'PLUGIN_VERSION', '0.1.0' );
 define( 'PLUGIN_NAMESPACE', 'nosun-popups-plugin' );
 
 /* -------------------------------------------------
