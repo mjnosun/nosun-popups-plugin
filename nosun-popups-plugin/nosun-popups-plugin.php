@@ -3,7 +3,7 @@
 Plugin Name: NOSUN Popups
 Plugin URI: https://github.com/mjnosun/nosun-popups-plugin
 Description: Custom Popups.
-Version: 2.0.4
+Version: 0.1.0
 Author: NOSUN - MJ
 Author URI: https://www.no-sun.com
 License: GPLv2 or later
@@ -11,7 +11,7 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain: nosun-popups-plugin
 Domain Path: /languages
 Requires at least: 6.5
-Tested up to: 6.8.2
+Tested up to: 6.9.4
 Requires PHP: 7.4
 Requires Plugins: advanced-custom-fields-pro
 */
@@ -561,4 +561,36 @@ add_action('admin_footer-post.php', function () {
 	</script>
 	<?php
 });
- */
+*/
+ 
+/* -------------------------------------------------
+schickt daten an ressourcen.your-project.at
+checkt, wo welche Plugin Version aktiv ist
+------------------------------------------------- */
+if ( is_admin() ) {
+	add_action( 'admin_init', function() {
+		if ( false === get_transient( 'nos_popups_plugin_version_report' ) ) {
+			
+			if ( ! function_exists( 'get_plugin_data' ) ) {
+				require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+			}
+			$plugin_data = get_plugin_data( __FILE__ );
+			$current_version = $plugin_data['Version'];
+
+			wp_remote_post( 'https://ressourcen.your-project.at/wp-json/nosun-popups-plugin/v1/report', [
+				'blocking'  => false, 
+				'timeout'   => 5,
+			'headers'   => [
+				'Content-Type' => 'application/json',
+			],
+			'body'      => wp_json_encode( [
+				'site_url' => get_site_url(),
+				'version'  => $current_version,
+				'api_key'  => 'sk_nosun_popups_nOqe5aNJc6AgWZV8lKEQAYGIgvWxpjwK'
+			] )
+		]);
+
+		set_transient( 'nos_popups_plugin_version_report', true, DAY_IN_SECONDS );
+	}
+});
+}
