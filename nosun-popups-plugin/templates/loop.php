@@ -113,7 +113,7 @@ if ($popupQuery->have_posts()) :
 				$endDate = $endDate ? date('Y-m-d', strtotime($endDate)) : null;
 			}
 
-			$popup_style = get_field('nts_pop_style') ?: 'default';
+			// $popup_style = get_field('nts_pop_style') ?: 'default';
 		}
 
 		// Prepare date condition

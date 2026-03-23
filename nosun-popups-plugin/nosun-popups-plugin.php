@@ -3,7 +3,7 @@
 Plugin Name: NOSUN Popups
 Plugin URI: https://github.com/mjnosun/nosun-popups-plugin
 Description: Custom Popups.
-Version: 0.0.7
+Version: 2.0.4
 Author: NOSUN - MJ
 Author URI: https://www.no-sun.com
 License: GPLv2 or later
@@ -11,7 +11,7 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain: nosun-popups-plugin
 Domain Path: /languages
 Requires at least: 6.5
-Tested up to: 6.7.2
+Tested up to: 6.8.2
 Requires PHP: 7.4
 Requires Plugins: advanced-custom-fields-pro
 */
@@ -19,13 +19,13 @@ Requires Plugins: advanced-custom-fields-pro
 /* -------------------------------------------------
 constants
 ------------------------------------------------- */
-define( 'PLUGIN_VERSION', '0.0.9' );
+define( 'PLUGIN_VERSION', '2.0.3' );
 define( 'PLUGIN_NAMESPACE', 'nosun-popups-plugin' );
 
 /* -------------------------------------------------
 enqueue FRONTEND styles & scripts
 ------------------------------------------------- */
-add_action( 'wp_enqueue_scripts', 'nos_popups_enqueue' );
+add_action( 'wp_enqueue_scripts', 'nos_popups_enqueue', 20 );
 function nos_popups_enqueue() {
 	// styles
 	wp_enqueue_style('nos-popups-plugin-css', plugin_dir_url( __FILE__ ) . 'assets/css/popups-main.css', array(), PLUGIN_VERSION, 'all');
@@ -112,6 +112,23 @@ function nos_popups_init() {
 		add_action('add_meta_boxes', 'my_remove_wp_seo_meta_box', 100);
 	}
 	
+	/* -------------------------------------------------
+	add acf options page General Popup Plugin Settings
+	------------------------------------------------- */
+	if( function_exists('acf_add_options_page') ) {
+	
+		acf_add_options_sub_page(array(
+			'page_title'  => 'Generelle Einstellungen',
+			'menu_title'  => 'Generelle Popup Einstellungen',
+			'parent_slug' => 'edit.php?post_type=nos_popups',
+			'menu_slug'   => 'nos-general-popup-settings',
+			'capability'  => 'edit_posts',
+		));
+		
+		include_once(WP_PLUGIN_DIR . '/nosun-popups-plugin/popup-options-acf-fields.php');
+	}
+
+	
 }
 add_action( 'init', 'nos_popups_init');
 
@@ -185,11 +202,14 @@ if ( class_exists('ACF') ) {
 		
 	
 		if ( $column === 'nts_popup_status' ) {
+			$today = date('Y-m-d');
+			$popupDateBegin = $aktiv_von ? date('Y-m-d', strtotime($aktiv_von)) : null;
+			$popupDateEnd = $aktiv_bis ? date('Y-m-d', strtotime($aktiv_bis)) : null;
+			
 			if ( $popup_aktivieren ) {
-				$today = date('Y-m-d');
-				$popupDateBegin = $aktiv_von ? date('Y-m-d', strtotime($aktiv_von)) : null;
-				$popupDateEnd = $aktiv_bis ? date('Y-m-d', strtotime($aktiv_bis)) : null;
 				$is_active = true;
+				echo '<div style="color:#48C572;display:inline-flex;align-items:center;grid-gap:10px;"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#48C572" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-circle"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Aktiv</span></div>';
+				/*
 				
 				// If both dates are set
 				if ( $aktiv_von && $aktiv_bis ) {
@@ -228,10 +248,13 @@ if ( class_exists('ACF') ) {
 				elseif ( !$aktiv_von && !$aktiv_bis ) {
 					echo '<div style="color:#48C572;display:inline-flex;align-items:center;grid-gap:10px;"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#48C572" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-circle"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>Aktiv</span></div>';
 				}
+				*/
 			} else {
 				echo '<div style="color:#C84630;display:inline-flex;align-items:center;grid-gap:10px;"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C84630" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x-circle"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> <span>Inaktiv</span></div>';
 				$is_active = false;
 			}
+			
+			
 			if ( $is_active == true ) {
 				$button_text = 'Deaktivieren';
 				$button_class = 'button deactivate';
@@ -243,10 +266,34 @@ if ( class_exists('ACF') ) {
 			echo '<div><a href="' . admin_url('edit.php?post_type=nos_popups&toggle_activate=' . $post_id . '&_wpnonce=' . wp_create_nonce('toggle_activate_' . $post_id)) . '" class="' . $button_class . ' nos_popup_quick_btn"><span class="toggle-button-text">' . $button_text . '</span><div class="toggle-knob-holder"><div class="toggle-knob"></div></div></a></div>';
 		} elseif ( $column === 'nts_popup_from' ) {
 			$popupStartDateOutput = $aktiv_von ? date('d.m.Y', strtotime($aktiv_von)) : '-';
-			echo ($aktiv_von && $popup_aktivieren ? $popupStartDateOutput : '-');
+			
+			$today = date('Y-m-d');
+			$popupDateBegin = $aktiv_von ? date('Y-m-d', strtotime($aktiv_von)) : null;
+			$popupDateEnd = $aktiv_bis ? date('Y-m-d', strtotime($aktiv_bis)) : null;
+			
+			if ( $today < $popupDateBegin ) {
+				echo '<span style="color: #C84630;">Geplant: <br>';
+			} else {
+				echo '<span>';
+			}
+			echo ($aktiv_von ? $popupStartDateOutput : '-');
+			// echo ($aktiv_von && $popup_aktivieren ? $popupStartDateOutput : '-');
+			echo '</span>';
 		} elseif ( $column === 'nts_popup_to' ) {
 			$popupEndDateOutput = $aktiv_bis ? date('d.m.Y', strtotime($aktiv_bis)) : '-';
-			echo ($aktiv_bis && $popup_aktivieren ? $popupEndDateOutput : '-');
+			
+			$today = date('Y-m-d');
+			$popupDateBegin = $aktiv_von ? date('Y-m-d', strtotime($aktiv_von)) : null;
+			$popupDateEnd = $aktiv_bis ? date('Y-m-d', strtotime($aktiv_bis)) : null;
+			
+			if ( $today > $popupDateEnd ) {
+				echo '<span style="color: #C84630;">Vergangen: <br>';
+			} else {
+				echo '<span>';
+			}
+			echo ($aktiv_bis ? $popupEndDateOutput : '-');
+			// echo ($aktiv_bis && $popup_aktivieren ? $popupEndDateOutput : '-');
+			echo '</span>';
 		}
 	}
 
@@ -334,32 +381,184 @@ add_action('wp_body_open', 'nos_popup_content_after_body_open_tag', 5);
 /* -------------------------------------------------
 flush all caches on post save
 ------------------------------------------------- */
+// add_action('save_post_nos_popups', 'flush_all_caches_on_popup_save', 10, 3);
+// function flush_all_caches_on_popup_save($post_id, $post, $update) {
+// 	// WP Rocket
+// 	if (function_exists('rocket_clean_domain')) {
+// 		rocket_clean_domain();
+// 	}
+// 	
+// 	// W3 Total Cache
+// 	if (function_exists('w3tc_flush_all')) {
+// 		w3tc_flush_all();
+// 	}
+// 	
+// 	// WP Super Cache
+// 	if (function_exists('wp_cache_clean_cache')) {
+// 		global $file_prefix;
+// 		wp_cache_clean_cache($file_prefix);
+// 	}
+// 	
+// 	// LiteSpeed Cache
+// 	if (has_action('litespeed_purge_all')) {
+// 		do_action('litespeed_purge_all');
+// 	}
+// 	
+// 	// Clear object cache
+// 	wp_cache_flush();
+// 	
+// 	// Additional hook for other plugins
+// 	do_action('nos_popups_flush_cache');
+// }
+
+/* -------------------------------------------------
+flush all caches on post save & schedule future flushes
+------------------------------------------------- */
 add_action('save_post_nos_popups', 'flush_all_caches_on_popup_save', 10, 3);
-function flush_all_caches_on_popup_save($post_id, $post, $update) {
+
+function flush_all_caches_on_popup_save($post_id, $post = null, $update = null) {
+	
+	// 1. Flush IMMEDIATELY. 
+	// This covers the case where you just set a date that is ALREADY in the past,
+	// or you changed the popup text/image.
+	nos_perform_actual_cache_flush();
+
+	if ( !function_exists('get_field') ) return;
+
+	$timeframe = get_field('nts_pop_timeframe', $post_id);
+	if ( $timeframe ) {
+		// Clear old "alarm clocks" so we don't have multiple flushes for one post
+		wp_clear_scheduled_hook('nos_popups_scheduled_flush_event', array($post_id));
+
+		$start_timestamp = strtotime($timeframe['nts_pop_start_date']);
+		$end_timestamp   = strtotime($timeframe['nts_pop_end_date']);
+		
+		$now = time();
+
+		// 2. Schedule the START transition (if it's in the future)
+		if ($start_timestamp && $start_timestamp > $now) {
+			wp_schedule_single_event($start_timestamp, 'nos_popups_scheduled_flush_event', array($post_id));
+		}
+
+		// 3. Schedule the END transition (if it's in the future)
+		if ($end_timestamp && $end_timestamp > $now) {
+			wp_schedule_single_event($end_timestamp, 'nos_popups_scheduled_flush_event', array($post_id));
+		}
+	}
+}
+
+// 3. THE ACTUAL FLUSH LOGIC (Moved to a reusable function)
+function nos_perform_actual_cache_flush() {
 	// WP Rocket
 	if (function_exists('rocket_clean_domain')) {
 		rocket_clean_domain();
 	}
-	
 	// W3 Total Cache
 	if (function_exists('w3tc_flush_all')) {
 		w3tc_flush_all();
 	}
-	
 	// WP Super Cache
 	if (function_exists('wp_cache_clean_cache')) {
 		global $file_prefix;
 		wp_cache_clean_cache($file_prefix);
 	}
-	
 	// LiteSpeed Cache
 	if (has_action('litespeed_purge_all')) {
 		do_action('litespeed_purge_all');
 	}
-	
 	// Clear object cache
 	wp_cache_flush();
 	
-	// Additional hook for other plugins
 	do_action('nos_popups_flush_cache');
 }
+
+// 4. MAP THE SCHEDULED EVENT TO THE FLUSH FUNCTION
+add_action('nos_popups_scheduled_flush_event', 'nos_perform_actual_cache_flush');
+
+
+
+
+/* -------------------------------------------------
+live preview iframe
+-------------------------------------------------
+add_action('admin_footer-post.php', function () {
+	global $post;
+
+	if ($post && $post->post_status !== 'publish') {
+		// Get the correct preview URL with nonce
+		$preview_url = get_preview_post_link($post);
+	} else {
+		// If published, just use the permalink
+		$preview_url = get_permalink($post);
+	}
+
+	?>
+	<script>
+		(function($) {
+			$(document).ready(function() {
+				const previewUrl = <?php echo json_encode($preview_url); ?>;
+
+				// Create the iframe
+				const iframe = $('<iframe>', {
+					id: 'live-preview-iframe',
+					src: previewUrl,
+					style: 'border: 1px solid #ccc; margin-top: 20px;width:100%;height:100svh;'
+				});
+
+				// Add title
+				const title = $('<h2>', {
+					text: 'Live Preview',
+					style: 'margin-top: 40px;'
+				});
+
+				// Append to editor area
+				const preview_tab_content = $('#nosun_popups__tab__live_preview');
+				preview_tab_content.append(title, iframe);
+				
+				// Refresh the iframe after save
+				let iframeLoadedOnce = false;
+				
+				function refreshIframe() {
+					const current = $('#live-preview-iframe');
+					if (current.length === 0) return;
+				
+					let src = current.attr('src').split(/[?&]t=/)[0]; // Remove old `t` param if exists
+				
+					const separator = src.includes('?') ? '&' : '?';
+					const refreshedSrc = src + separator + 't=' + new Date().getTime();
+				
+					current.attr('src', refreshedSrc);
+				}
+				
+				// Hook into postbox save events
+				$('#post').on('submit', function() {
+					setTimeout(refreshIframe, 2000);
+				});
+				
+				// Optional: refresh iframe when hitting "Preview" too
+				$('a.preview').on('click', function(e) {
+					setTimeout(refreshIframe, 2000);
+				});
+				
+				
+				if ( $('.acf-tab-button[data-key="fieldkey__tab__live_preview"]').parent('li').hasClass('active') ) {
+					preview_tab_content.addClass('popup-iframe-visible');
+				}
+				
+				$('.acf-tab-button').on('click', function(e) {
+					const isPreviewTab = $(this).data('key') === 'fieldkey__tab__live_preview';
+				
+					if (isPreviewTab) {
+						preview_tab_content.addClass('popup-iframe-visible');
+						setTimeout(refreshIframe, 500);
+					} else {
+						preview_tab_content.removeClass('popup-iframe-visible');
+					}
+				});
+				
+			});
+		})(jQuery);
+	</script>
+	<?php
+});
+ */
